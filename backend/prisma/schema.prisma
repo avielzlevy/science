@@ -1,0 +1,119 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// ENUMS
+// ─────────────────────────────────────────────────────────────────────────────
+
+enum SkitStatus {
+  PENDING
+  GENERATING
+  COMPLETE
+  FAILED
+}
+
+enum ResearchSource {
+  SEMANTIC_SCHOLAR
+  NATURE
+  IEEE
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// MODELS
+// ─────────────────────────────────────────────────────────────────────────────
+
+model Category {
+  id        String   @id @default(uuid())
+  name      String   @unique
+  slug      String   @unique
+  skits     Skit[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([slug])
+  @@map("categories")
+}
+
+model Author {
+  id           String     @id @default(uuid())
+  name         String
+  affiliations String[]
+  papers       Research[] @relation("ResearchAuthors")
+  createdAt    DateTime   @default(now())
+
+  @@index([name])
+  @@map("authors")
+}
+
+model Research {
+  id             String         @id @default(uuid())
+  externalId     String         @unique
+  source         ResearchSource
+  title          String
+  abstract       String         @db.Text
+  doi            String?        @unique
+  publishedAt    DateTime
+  journalName    String?
+  citationCount  Int            @default(0)
+  journalImpact  Float?
+  rawJson        Json
+  authors        Author[]       @relation("ResearchAuthors")
+  skit           Skit?
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+
+  @@index([source, publishedAt])
+  @@index([citationCount])
+  @@map("research")
+}
+
+model Skit {
+  id               String     @id @default(uuid())
+  researchId       String     @unique
+  research         Research   @relation(fields: [researchId], references: [id], onDelete: Cascade)
+  categoryId       String
+  category         Category   @relation(fields: [categoryId], references: [id])
+
+  // ── Preset B — "The Visionary" narrative sections ──
+  worldBefore      String     @db.Text
+  breakthrough     String     @db.Text
+  newReality       String     @db.Text
+  fullScript       String     @db.Text
+
+  // ── Asset generation inputs ──
+  visualPrompt     String     @db.Text
+
+  // ── Sci-Fi vs Fact rating (0.0 = pure fact, 1.0 = pure sci-fi) ──
+  sciFiFactRating  Float      @default(0.5)
+
+  // ── Generated assets ──
+  coverArtUrl      String?
+  voiceoverUrl     String?
+
+  // ── Trust & reliability ──
+  reliabilityScore Int        @default(50)  // 0-100, updated by Trust Matrix cron
+  isRetracted      Boolean    @default(false)
+  lastAuditedAt    DateTime?
+
+  // ── Playback ──
+  played           Boolean    @default(false)
+  playCount        Int        @default(0)
+
+  // ── Pipeline state ──
+  generationStatus SkitStatus @default(PENDING)
+  failureReason    String?
+
+  createdAt        DateTime   @default(now())
+  updatedAt        DateTime   @updatedAt
+
+  @@index([categoryId, played])
+  @@index([reliabilityScore])
+  @@index([generationStatus])
+  @@map("skits")
+}
