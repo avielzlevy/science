@@ -285,8 +285,7 @@ export function ChemistryArt() {
 
     // Liquid swaying
     gsap.to('.liquid', {
-       skewX: 2,
-       scaleY: 1.02,
+       skewX: 3,
        transformOrigin: 'bottom center',
        duration: 1.5,
        yoyo: true,
@@ -310,11 +309,19 @@ export function ChemistryArt() {
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_bottom,_var(--tw-gradient-stops))] from-orange-600/30 to-transparent" />
       
       <svg className="flask w-[60%] h-[60%] lg:w-40 lg:h-40 drop-shadow-[0_15px_30px_rgba(249,115,22,0.4)] z-10" viewBox="0 0 100 100" fill="none">
+         <defs>
+           <clipPath id="flask-clip">
+             <path d="M45 15 L 45 40 L 20 80 A 10 10 0 0 0 30 90 L 70 90 A 10 10 0 0 0 80 80 L 55 40 L 55 15 Z" />
+           </clipPath>
+         </defs>
+
          {/* Flask Glass Back */}
          <path d="M45 15 L 45 40 L 20 80 A 10 10 0 0 0 30 90 L 70 90 A 10 10 0 0 0 80 80 L 55 40 L 55 15 Z" fill="rgba(255,255,255,0.1)" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
          
          {/* Liquid */}
-         <path className="liquid" d="M26 70 L 74 70 A 5 5 0 0 1 78 78 A 8 8 0 0 1 70 88 L 30 88 A 8 8 0 0 1 22 78 A 5 5 0 0 1 26 70 Z" fill="#F97316" />
+         <g clipPath="url(#flask-clip)">
+           <rect className="liquid" x="-10" y="65" width="120" height="40" fill="#F97316" />
+         </g>
          
          {/* Glass Front Reflection */}
          <path d="M30 80 A 10 10 0 0 1 20 80" stroke="white" strokeWidth="2" strokeLinecap="round" opacity="0.6" />
@@ -422,78 +429,144 @@ export function DiceArt() {
   const container = useRef<HTMLDivElement>(null);
 
   useGSAP(() => {
-    // 3D Isometric Tumbling Logic
-    gsap.to('.dice-group-1', {
-      rotationX: 360,
-      rotationY: 720,
-      rotationZ: 360,
+    // True 3D CSS Tumbling Logic
+    gsap.to('.dice-cube-1', {
+      rotationX: "random(360, 720)", 
+      rotationY: "random(360, 720)",
+      rotationZ: "random(0, 360)",
       x: "random(-10, 10)",
-      y: "random(-15, 5)",
-      duration: 3,
+      y: "random(-10, 10)",
+      duration: 5,
       repeat: -1,
       yoyo: true,
-      ease: 'power1.inOut',
-      transformOrigin: "50px 50px -25px" 
+      ease: 'sine.inOut',
     });
     
-    gsap.to('.dice-group-2', {
-      rotationX: -360,
-      rotationY: -360,
-      rotationZ: -720,
+    gsap.to('.dice-cube-2', {
+      rotationX: "random(-720, -360)",
+      rotationY: "random(-720, -360)",
+      rotationZ: "random(-360, 0)",
       x: "random(-5, 15)",
-      y: "random(-5, 15)",
-      duration: 4,
+      y: "random(-15, 5)",
+      duration: 6,
       repeat: -1,
       yoyo: true,
-      ease: 'power1.inOut',
-      delay: 0.2,
-      transformOrigin: "50px 50px -25px"
+      ease: 'sine.inOut',
+      delay: 0.2
     });
   }, { scope: container });
 
+  const faceCommon = "absolute w-full h-full rounded-xl shadow-[inset_0_0_15px_rgba(0,0,0,0.15)] p-3 box-border flex [backface-visibility:hidden]";
+  const faceWhite = `${faceCommon} bg-slate-50 border border-slate-300`;
+  const faceRed = `${faceCommon} bg-red-50 border border-red-300 shadow-[inset_0_0_15px_rgba(220,38,38,0.2)]`;
+
+  const DotWhite = () => <div className="w-3.5 h-3.5 bg-slate-900 rounded-full shadow-sm" />;
+  const DotRed = () => <div className="w-3.5 h-3.5 bg-red-600 rounded-full shadow-sm" />;
+
   return (
-    <div ref={container} className="relative w-full h-full flex items-center justify-center overflow-hidden bg-neutral-900 rounded-[1.5rem] group-hover:scale-105 transition-transform duration-1000 ease-[cubic-bezier(0.25,1,0.5,1)] perspective-1000">
+    <div ref={container} className="relative w-full h-full flex items-center justify-center overflow-hidden bg-neutral-900 rounded-[1.5rem] group-hover:scale-105 transition-transform duration-1000 ease-[cubic-bezier(0.25,1,0.5,1)]" style={{ perspective: '1000px' }}>
       
-      {/* Abstract casino floor grid - Expanded bounds to prevent black edge stripes on scale */}
+      {/* Abstract casino floor grid */}
       <div className="absolute inset-[-50%] opacity-[0.05]" style={{ backgroundImage: 'linear-gradient(white 1px, transparent 1px), linear-gradient(90deg, white 1px, transparent 1px)', backgroundSize: '20px 20px', transform: 'perspective(500px) rotateX(60deg)' }} />
       
-      <svg className="w-[70%] h-[70%] lg:w-48 lg:h-48 z-10 drop-shadow-[0_15px_30px_rgba(0,0,0,0.8)]" viewBox="0 0 100 100" fill="none" style={{ overflow: 'visible' }}>
-         {/* Dice 1 (Front/Left) - True Iso 3D */}
-         <g className="dice-group-1" transform="translate(-10, 0)">
-            {/* Top Face */}
-            <polygon points="50,15 80,30 50,45 20,30" fill="#FFFFFF" stroke="#E2E8F0" strokeWidth="1" />
-            <circle cx="50" cy="30" r="3" fill="#0F172A" transform="skewX(-30) scale(1, 0.866) translate(22, 10)" />
-            
-            {/* Right Face */}
-            <polygon points="80,30 80,65 50,80 50,45" fill="#E2E8F0" stroke="#CBD5E1" strokeWidth="1" />
-            <circle cx="60" cy="55" r="2.5" fill="#0F172A" />
-            <circle cx="70" cy="55" r="2.5" fill="#0F172A" />
-            <circle cx="65" cy="65" r="2.5" fill="#0F172A" />
+      {/* 3D Scene Wrapper */}
+      <div className="relative w-full h-full flex items-center justify-center scale-75 lg:scale-100 z-10" style={{ transformStyle: 'preserve-3d' }}>
+          
+          {/* Dice 1 (White) */}
+          <div className="absolute w-20 h-20 -ml-12 -mt-10" style={{ transformStyle: 'preserve-3d' }}>
+            <div className="dice-cube-1 w-full h-full absolute" style={{ transformStyle: 'preserve-3d' }}>
+                {/* 1 Front */}
+                <div className={faceWhite} style={{ transform: 'rotateY(0deg) translateZ(40px)' }}>
+                   <div className="w-full h-full flex items-center justify-center"><DotWhite /></div>
+                </div>
+                {/* 6 Back */}
+                <div className={faceWhite} style={{ transform: 'rotateY(180deg) translateZ(40px)' }}>
+                   <div className="w-full h-full flex justify-between">
+                      <div className="flex flex-col justify-between"><DotWhite /><DotWhite /><DotWhite /></div>
+                      <div className="flex flex-col justify-between"><DotWhite /><DotWhite /><DotWhite /></div>
+                   </div>
+                </div>
+                {/* 2 Right */}
+                <div className={faceWhite} style={{ transform: 'rotateY(90deg) translateZ(40px)' }}>
+                   <div className="w-full h-full flex flex-col justify-between">
+                      <div className="self-end"><DotWhite /></div>
+                      <div className="self-start"><DotWhite /></div>
+                   </div>
+                </div>
+                {/* 5 Left */}
+                <div className={faceWhite} style={{ transform: 'rotateY(-90deg) translateZ(40px)' }}>
+                   <div className="w-full h-full flex justify-between">
+                      <div className="flex flex-col justify-between"><DotWhite /><DotWhite /></div>
+                      <div className="flex flex-col justify-center"><DotWhite /></div>
+                      <div className="flex flex-col justify-between"><DotWhite /><DotWhite /></div>
+                   </div>
+                </div>
+                {/* 3 Top */}
+                <div className={faceWhite} style={{ transform: 'rotateX(90deg) translateZ(40px)' }}>
+                   <div className="w-full h-full flex justify-between">
+                      <div className="self-start"><DotWhite /></div>
+                      <div className="self-center"><DotWhite /></div>
+                      <div className="self-end"><DotWhite /></div>
+                   </div>
+                </div>
+                {/* 4 Bottom */}
+                <div className={faceWhite} style={{ transform: 'rotateX(-90deg) translateZ(40px)' }}>
+                   <div className="w-full h-full flex justify-between">
+                      <div className="flex flex-col justify-between"><DotWhite /><DotWhite /></div>
+                      <div className="flex flex-col justify-between"><DotWhite /><DotWhite /></div>
+                   </div>
+                </div>
+            </div>
+          </div>
 
-            {/* Left Face */}
-            <polygon points="20,30 50,45 50,80 20,65" fill="#CBD5E1" stroke="#94A3B8" strokeWidth="1" />
-            <circle cx="35" cy="55" r="3" fill="#0F172A" />
-         </g>
-         
-         {/* Dice 2 (Back/Right) - True Iso 3D */}
-         <g className="dice-group-2" transform="translate(30, 20) scale(0.8)">
-            {/* Top Face */}
-            <polygon points="50,15 80,30 50,45 20,30" fill="#FEE2E2" stroke="#FECACA" strokeWidth="1" />
-            <circle cx="50" cy="30" r="3" fill="#DC2626" transform="skewX(-30) scale(1, 0.866) translate(22, 10)" />
-            <circle cx="40" cy="27" r="3" fill="#DC2626" transform="skewX(-30) scale(1, 0.866) translate(22, 10)" />
-            <circle cx="60" cy="33" r="3" fill="#DC2626" transform="skewX(-30) scale(1, 0.866) translate(22, 10)" />
-            
-            {/* Right Face */}
-            <polygon points="80,30 80,65 50,80 50,45" fill="#FCA5A5" stroke="#F87171" strokeWidth="1" />
-            <circle cx="65" cy="60" r="3" fill="#991B1B" />
+          {/* Dice 2 (Red theme) */}
+          <div className="absolute w-20 h-20 ml-16 mt-16 scale-90" style={{ transformStyle: 'preserve-3d' }}>
+            <div className="dice-cube-2 w-full h-full absolute" style={{ transformStyle: 'preserve-3d' }}>
+                {/* 2 Front */}
+                <div className={faceRed} style={{ transform: 'rotateY(0deg) translateZ(40px)' }}>
+                   <div className="w-full h-full flex flex-col justify-between">
+                      <div className="self-end"><DotRed /></div>
+                      <div className="self-start"><DotRed /></div>
+                   </div>
+                </div>
+                {/* 5 Back */}
+                <div className={faceRed} style={{ transform: 'rotateY(180deg) translateZ(40px)' }}>
+                   <div className="w-full h-full flex justify-between">
+                      <div className="flex flex-col justify-between"><DotRed /><DotRed /></div>
+                      <div className="flex flex-col justify-center"><DotRed /></div>
+                      <div className="flex flex-col justify-between"><DotRed /><DotRed /></div>
+                   </div>
+                </div>
+                {/* 6 Right */}
+                <div className={faceRed} style={{ transform: 'rotateY(90deg) translateZ(40px)' }}>
+                   <div className="w-full h-full flex justify-between">
+                      <div className="flex flex-col justify-between"><DotRed /><DotRed /><DotRed /></div>
+                      <div className="flex flex-col justify-between"><DotRed /><DotRed /><DotRed /></div>
+                   </div>
+                </div>
+                {/* 1 Left */}
+                <div className={faceRed} style={{ transform: 'rotateY(-90deg) translateZ(40px)' }}>
+                   <div className="w-full h-full flex items-center justify-center"><DotRed /></div>
+                </div>
+                {/* 4 Top */}
+                <div className={faceRed} style={{ transform: 'rotateX(90deg) translateZ(40px)' }}>
+                   <div className="w-full h-full flex justify-between">
+                      <div className="flex flex-col justify-between"><DotRed /><DotRed /></div>
+                      <div className="flex flex-col justify-between"><DotRed /><DotRed /></div>
+                   </div>
+                </div>
+                {/* 3 Bottom */}
+                <div className={faceRed} style={{ transform: 'rotateX(-90deg) translateZ(40px)' }}>
+                   <div className="w-full h-full flex justify-between">
+                      <div className="self-start"><DotRed /></div>
+                      <div className="self-center"><DotRed /></div>
+                      <div className="self-end"><DotRed /></div>
+                   </div>
+                </div>
+            </div>
+          </div>
 
-            {/* Left Face */}
-            <polygon points="20,30 50,45 50,80 20,65" fill="#F87171" stroke="#EF4444" strokeWidth="1" />
-            <circle cx="35" cy="50" r="2.5" fill="#991B1B" />
-            <circle cx="35" cy="65" r="2.5" fill="#991B1B" />
-         </g>
-         
-      </svg>
+      </div>
     </div>
   );
 }
