@@ -44,6 +44,16 @@ const TRANSCRIPTS: Record<string, {start: number, end: number, text: string}[]> 
   ]
 };
 
+export const CATEGORY_COLORS: Record<string, string> = {
+  space: '#020617', // Deep Cosmos Space Black
+  physics: '#312E81', // Indigo Night
+  biology: '#064E3B', // Deep Emerald Pine
+  computers: '#1E1B4B', // Midnight Violet
+  chemistry: '#450A0A', // Blood Maroon
+  wildcard: '#4C0519', // Rose Black
+  dice: '#171717', // Neutral Dark
+};
+
 const MOCK_AUDIO_SRC = "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3";
 
 export function Stage({ 
@@ -91,22 +101,24 @@ export function Stage({
 
   return (
     <motion.div
+      layoutId={`card-${safeCategory}`}
       initial={{ opacity: 0, y: 50, scale: 0.95 }}
       animate={{ opacity: 1, y: 0, scale: 1 }}
       exit={{ opacity: 0, scale: 1.05, filter: "blur(10px)" }}
       transition={{ duration: 0.8, ease: [0.25, 1, 0.5, 1] }}
-      className="fixed inset-0 z-[100] flex items-center justify-center bg-[#F5F5F7]"
+      className="fixed inset-0 z-[100] flex items-center justify-center bg-black overflow-hidden"
     >
-      {/* Clean Room Cinematic Background Cover */}
+      {/* Dynamic Background Cover derived from Category Hex */}
       <div 
-        className="absolute inset-0 opacity-[0.85] bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-white via-[#F5F5F7] to-[#E5E5E7]" 
+        className="absolute inset-0 opacity-[1] bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-white/10 to-transparent mix-blend-screen" 
+        style={{ backgroundColor: CATEGORY_COLORS[safeCategory] || '#000000' }}
       />
       {/* Background ambient lighting */}
       <div className="absolute top-0 right-0 w-2/3 h-full bg-gradient-to-l from-black/5 to-transparent mix-blend-multiply pointer-events-none" />
 
       <button 
         onClick={onClose}
-        className="absolute top-8 right-8 z-50 p-4 rounded-full bg-black/5 hover:bg-black/10 text-black backdrop-blur-3xl transition-all shadow-sm border border-black/5"
+        className="absolute top-8 right-8 z-50 p-4 rounded-full bg-white/10 hover:bg-white/20 text-white backdrop-blur-3xl transition-all shadow-sm border border-white/10"
       >
         <X size={24} />
       </button>
@@ -128,7 +140,7 @@ export function Stage({
         <div className="perspective-1000 mb-16">
           {/* Cover Art - True 3D Floating */}
           <motion.div 
-            className="w-[28rem] h-[40rem] rounded-[2rem] shadow-[0_30px_60px_rgba(0,0,0,0.1),0_0_10px_rgba(0,0,0,0.05)_inset] overflow-hidden border border-white mb-8 flex flex-col items-center justify-center bg-gradient-to-br from-white to-gray-50 relative"
+            className="w-[28rem] h-[40rem] rounded-[2rem] shadow-[0_30px_60px_rgba(0,0,0,0.5),0_0_10px_rgba(255,255,255,0.05)_inset] overflow-hidden border border-white/10 mb-8 flex flex-col items-center justify-center bg-gradient-to-br from-white/10 to-black relative backdrop-blur-3xl"
             initial={{ scale: 0.9, opacity: 0, rotateX: 20, y: 50 }}
             animate={{ scale: 1, opacity: 1, rotateX: 0, y: 0 }}
             whileHover={{ rotateY: 5, rotateX: -5, scale: 1.02 }}
@@ -136,13 +148,13 @@ export function Stage({
             style={{ transformStyle: 'preserve-3d' }}
           >
              {/* Clean Room Decorative elements */}
-             <div className="absolute inset-0 opacity-[0.03] bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-black via-transparent to-transparent pointer-events-none" />
+             <div className="absolute inset-0 opacity-[0.2] bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-white via-transparent to-transparent pointer-events-none mix-blend-overlay" />
              
-             <div className="absolute top-12 left-12 w-24 h-1 bg-black/10 rounded-full" style={{ transform: 'translateZ(20px)' }} />
-             <div className="absolute bottom-12 right-12 w-16 h-1 bg-black/10 rounded-full" style={{ transform: 'translateZ(20px)' }} />
+             <div className="absolute top-12 left-12 w-24 h-1 bg-white/20 rounded-full" style={{ transform: 'translateZ(20px)' }} />
+             <div className="absolute bottom-12 right-12 w-16 h-1 bg-white/20 rounded-full" style={{ transform: 'translateZ(20px)' }} />
 
              <motion.div 
-                 className="font-heading font-black text-6xl text-black/90 z-10 text-center px-8 uppercase tracking-tighter"
+                 className="font-heading font-black text-6xl text-white/90 z-10 text-center px-8 uppercase tracking-tighter mix-blend-exclusion"
                  style={{ transform: 'translateZ(40px)' }}
              >
                {category || (isWildcard ? "Wildcard Data" : "Research File")}

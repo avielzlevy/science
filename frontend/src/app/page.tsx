@@ -39,12 +39,12 @@ export default function Home() {
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 1, ease: [0.25, 1, 0.5, 1] }}
-          className="px-12 mb-8 max-w-7xl mx-auto text-center flex flex-col items-center justify-center relative z-20"
+          className="px-12 mb-8 max-w-7xl mx-auto text-center flex flex-col items-center justify-center relative z-20 mix-blend-exclusion"
         >
           <h1 className="text-6xl md:text-[4rem] font-heading font-extrabold text-black tracking-tighter mb-4 leading-none">
-            Research<span className="text-rose-600 drop-shadow-sm">Reels</span>
+            Research<span className="text-rose-400 drop-shadow-sm">Reels</span>
           </h1>
-          <p className="text-xl md:text-2xl font-light text-black/70 tracking-tight max-w-2xl mt-2 drop-shadow-sm">
+          <p className="text-xl md:text-2xl font-light text-white/70 tracking-tight max-w-2xl mt-2 drop-shadow-sm">
             Curated scientific narratives delivered through a cinematic digital theater.
           </p>
         </motion.header>

@@ -14,30 +14,38 @@ const BLOB_2 = "M42.4,-64.8C54.1,-58.5,62.2,-44.6,69.5,-29.4C76.8,-14.2,83.3,2.4
 
 function LiquidFill({ active, color, x, y }: { active: boolean, color: string, x: number, y: number }) {
   const container = useRef<HTMLDivElement>(null);
-  
+  const tl = useRef<gsap.core.Timeline>(null);
+
   useGSAP(() => {
-    if (active) {
-      gsap.to('.liquid-path', { opacity: 1, duration: 0.6, ease: 'power2.out', overwrite: 'auto' });
-      gsap.to('.liquid-blob-1', { scale: 50, rotation: 65, duration: 1.5, ease: 'power3.out', overwrite: 'auto' });
-      gsap.to('.liquid-blob-2', { scale: 55, rotation: -45, duration: 2.0, ease: 'power2.out', overwrite: 'auto' });
-    } else {
-      gsap.to('.liquid-path', { opacity: 0, duration: 1.0, ease: 'power2.inOut', overwrite: 'auto' });
-      gsap.to(['.liquid-blob-1', '.liquid-blob-2'], { scale: 0, rotation: 0, duration: 1.2, ease: 'power3.inOut', overwrite: 'auto' });
+    // 1. Build the timeline exactly once, start it paused
+    if (!tl.current) {
+        tl.current = gsap.timeline({ paused: true });
+        tl.current.to('.liquid-path', { opacity: 1, duration: 0.6, ease: 'power2.out' }, 0);
+        tl.current.to('.liquid-blob-1', { scale: 50, rotation: 65, duration: 1.5, ease: 'power3.out' }, 0);
+        tl.current.to('.liquid-blob-2', { scale: 55, rotation: -45, duration: 2.0, ease: 'power2.out' }, 0);
     }
-  }, { dependencies: [active], scope: container });
+  }, { scope: container });
+
+  // 2. Control playback with a separate effect based purely on the `active` prop
+  useGSAP(() => {
+      if (active) {
+          gsap.killTweensOf(tl.current); // Prevent reverse/play clashing
+          tl.current?.timeScale(1).play();
+      } else {
+          // Play backwards much faster to clear the screen without blocking the next hover
+          tl.current?.timeScale(2).reverse();
+      }
+  }, { dependencies: [active] });
 
   return (
       <div ref={container} className="fixed inset-0 pointer-events-none z-0 mix-blend-multiply">
         <svg 
-           className="absolute pointer-events-none"
+           className="absolute pointer-events-none w-[100px] h-[100px] overflow-visible"
            style={{
               left: x,
               top: y,
-              width: 100,
-              height: 100,
               marginLeft: -50,
               marginTop: -50,
-              overflow: 'visible'
            }}
            viewBox="-100 -100 200 200"
         >
@@ -57,17 +65,17 @@ function cn(...inputs: ClassValue[]) {
 }
 
 const CATEGORIES = [
-  { id: 'space', title: 'Space', Artwork: SpaceArt, bgColor: '#AEC6CF' }, // Pastel Blue
-  { id: 'physics', title: 'Physics', Artwork: PhysicsArt, bgColor: '#C2B280' }, // Sand/Gold
-  { id: 'biology', title: 'Biology', Artwork: BiologyArt, bgColor: '#98FB98' }, // Pale Green
-  { id: 'computers', title: 'Computers', Artwork: ComputersArt, bgColor: '#E6E6FA' }, // Lavender
-  { id: 'chemistry', title: 'Chemistry', Artwork: ChemistryArt, bgColor: '#FFB347' }, // Pastel Orange
+  { id: 'space', title: 'Space', Artwork: SpaceArt, bgColor: '#020617' }, // Deep Cosmos Space Black
+  { id: 'physics', title: 'Physics', Artwork: PhysicsArt, bgColor: '#312E81' }, // Indigo Night
+  { id: 'biology', title: 'Biology', Artwork: BiologyArt, bgColor: '#064E3B' }, // Deep Emerald Pine
+  { id: 'computers', title: 'Computers', Artwork: ComputersArt, bgColor: '#1E1B4B' }, // Midnight Violet
+  { id: 'chemistry', title: 'Chemistry', Artwork: ChemistryArt, bgColor: '#450A0A' }, // Blood Maroon
 ];
 
 const ALL_CARDS = [
   ...CATEGORIES,
-  { id: 'wildcard', bgColor: '#FF6961' }, // Pastel Red
-  { id: 'dice', bgColor: '#D3D3D3' }      // Light Grey
+  { id: 'wildcard', bgColor: '#4C0519' }, // Rose Black 
+  { id: 'dice', bgColor: '#171717' }      // Neutral Dark
 ];
 
 export function Ribbon({ onDiceRoll, onSelectCategory }: { onDiceRoll: () => void, onSelectCategory: (cat: string) => void }) {
@@ -126,6 +134,7 @@ export function Ribbon({ onDiceRoll, onSelectCategory }: { onDiceRoll: () => voi
           const Artwork = cat.Artwork;
           return (
             <motion.div
+              layoutId={`card-${cat.id}`}
               key={cat.id}
               onMouseEnter={(e) => handleMouseEnter(e, cat.id)}
               className={cn(
@@ -151,6 +160,7 @@ export function Ribbon({ onDiceRoll, onSelectCategory }: { onDiceRoll: () => voi
         {/* The Dice and Wildcard Section */}
         {/* The Wildcard Tile */}
         <motion.div
+          layoutId="card-wildcard"
           onMouseEnter={(e) => handleMouseEnter(e, 'wildcard')} 
           className={cn(
             "flex-1 min-w-0 max-w-[18rem] h-full relative rounded-[1.5rem] lg:rounded-[2rem] overflow-hidden group border border-foreground/5 shadow-[0_10px_30px_rgba(0,0,0,0.05)] cursor-pointer bg-white"
