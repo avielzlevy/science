@@ -10,12 +10,39 @@ function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
-// Mock transcript
-const TRANSCRIPT = [
-  { start: 0, end: 3, text: "In the deep void of space..." },
-  { start: 3, end: 6, text: "there whispers a signal older than time." },
-  { start: 6, end: 10, text: "Wait. Was that real? Or is it a glitch in the simulation?" },
-];
+// Dynamic transcripts mapping
+const TRANSCRIPTS: Record<string, {start: number, end: number, text: string}[]> = {
+  space: [
+    { start: 0, end: 3, text: "The Voyager probe has left the solar system." },
+    { start: 3, end: 6, text: "But it just sent back an impossible signal." },
+    { start: 6, end: 10, text: "It sounds... exactly like a human heartbeat." },
+  ],
+  physics: [
+    { start: 0, end: 3, text: "Quantum entanglement defies logic." },
+    { start: 3, end: 6, text: "Change the spin of a particle here, and its twin flips across the galaxy." },
+    { start: 6, end: 10, text: "Einstein called it 'spooky action'. He was right to be afraid." },
+  ],
+  biology: [
+    { start: 0, end: 3, text: "Deep inside the Mariana Trench..." },
+    { start: 3, end: 6, text: "we found an organism that doesn't use DNA." },
+    { start: 6, end: 10, text: "It uses pure silicon. It's essentially a living machine." },
+  ],
+  computers: [
+    { start: 0, end: 3, text: "In 1989, a worm was released on the ARPANET." },
+    { start: 3, end: 6, text: "It mapped every machine it touched." },
+    { start: 6, end: 10, text: "But it never stopped running. Even today." },
+  ],
+  chemistry: [
+    { start: 0, end: 3, text: "Drop francium into water." },
+    { start: 3, end: 6, text: "The reaction is so violent it shatters the glass." },
+    { start: 6, end: 10, text: "Now imagine that reaction... in reverse." },
+  ],
+  wildcard: [
+    { start: 0, end: 3, text: "Wait. Was that real?" },
+    { start: 3, end: 6, text: "Or is it a glitch in the simulation?" },
+    { start: 6, end: 10, text: "Let's find out." },
+  ]
+};
 
 const MOCK_AUDIO_SRC = "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3";
 
@@ -33,9 +60,6 @@ export function Stage({
   const [showGame, setShowGame] = useState(false);
   const [gameResult, setGameResult] = useState<'won' | 'lost' | null>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
-
-  // Reality Anchor / Trust Badge mock score
-  const reliabilityScore = isWildcard ? 25 : 98; // Low for wildcard, high for normal
 
   const togglePlay = () => {
     if (!audioRef.current) return;
@@ -60,67 +84,89 @@ export function Stage({
     }
   };
 
+  // Safe category fallback for transcripts
+  const safeCategory = category && TRANSCRIPTS[category] ? category : 'wildcard';
+  const activeTranscript = TRANSCRIPTS[safeCategory];
+  const reliabilityScore = isWildcard ? 25 : 98;
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 50, scale: 0.95 }}
       animate={{ opacity: 1, y: 0, scale: 1 }}
       exit={{ opacity: 0, scale: 1.05, filter: "blur(10px)" }}
       transition={{ duration: 0.8, ease: [0.25, 1, 0.5, 1] }}
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black"
+      className="fixed inset-0 z-[100] flex items-center justify-center bg-[#F5F5F7]"
     >
-      {/* Heavily Blurred Background Cover */}
+      {/* Clean Room Cinematic Background Cover */}
       <div 
-        className="absolute inset-0 bg-cover bg-center opacity-40 mix-blend-luminosity blur-3xl scale-110" 
-        style={{ backgroundImage: `url('https://images.unsplash.com/photo-1451187580459-43490279c0fa?q=80&w=1200')` }} 
+        className="absolute inset-0 opacity-[0.85] bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-white via-[#F5F5F7] to-[#E5E5E7]" 
       />
+      {/* Background ambient lighting */}
+      <div className="absolute top-0 right-0 w-2/3 h-full bg-gradient-to-l from-black/5 to-transparent mix-blend-multiply pointer-events-none" />
 
       <button 
         onClick={onClose}
-        className="absolute top-8 right-8 z-50 p-3 rounded-full bg-white/10 hover:bg-white/20 text-white backdrop-blur-md transition-all"
+        className="absolute top-8 right-8 z-50 p-4 rounded-full bg-black/5 hover:bg-black/10 text-black backdrop-blur-3xl transition-all shadow-sm border border-black/5"
       >
         <X size={24} />
       </button>
 
       {/* Trust Badge - The Reality Anchor */}
-      <div className="absolute top-8 left-8 z-50 flex items-center gap-3 px-4 py-2 rounded-full border border-white/20 bg-black/40 backdrop-blur-md">
+      <div className="absolute top-8 left-8 z-50 flex items-center gap-3 px-5 py-3 rounded-full border border-black/10 bg-white/80 backdrop-blur-3xl shadow-sm text-black">
         {reliabilityScore > 80 ? (
-          <ShieldCheck className="text-green-400" size={20} />
+          <ShieldCheck className="text-emerald-500" size={20} />
         ) : (
-          <ShieldAlert className="text-yellow-400 animate-pulse" size={20} />
+          <ShieldAlert className="text-orange-500 animate-[pulse_2s_ease-in-out_infinite]" size={20} />
         )}
-        <span className="font-heading font-semibold text-white tracking-widest uppercase text-sm">
+        <span className="font-heading font-bold tracking-widest uppercase text-xs">
           Reality {reliabilityScore}%
         </span>
       </div>
 
       <div className="relative z-10 flex flex-col items-center w-full max-w-4xl px-8">
         
-        {/* Cover Art - Sharp */}
-        <motion.div 
-          className="w-64 h-96 rounded-2xl shadow-2xl overflow-hidden border border-white/10 mb-12"
-          initial={{ scale: 0.9, opacity: 0 }}
-          animate={{ scale: 1, opacity: 1 }}
-          transition={{ delay: 0.2, duration: 0.7, ease: [0.25, 1, 0.5, 1] }}
-        >
-          <img src="https://images.unsplash.com/photo-1451187580459-43490279c0fa?q=80&w=600&h=900&fit=crop" className="w-full h-full object-cover" alt="Skit Cover" />
-        </motion.div>
+        <div className="perspective-1000 mb-16">
+          {/* Cover Art - True 3D Floating */}
+          <motion.div 
+            className="w-[28rem] h-[40rem] rounded-[2rem] shadow-[0_30px_60px_rgba(0,0,0,0.1),0_0_10px_rgba(0,0,0,0.05)_inset] overflow-hidden border border-white mb-8 flex flex-col items-center justify-center bg-gradient-to-br from-white to-gray-50 relative"
+            initial={{ scale: 0.9, opacity: 0, rotateX: 20, y: 50 }}
+            animate={{ scale: 1, opacity: 1, rotateX: 0, y: 0 }}
+            whileHover={{ rotateY: 5, rotateX: -5, scale: 1.02 }}
+            transition={{ type: "spring", stiffness: 100, damping: 20, delay: 0.2 }}
+            style={{ transformStyle: 'preserve-3d' }}
+          >
+             {/* Clean Room Decorative elements */}
+             <div className="absolute inset-0 opacity-[0.03] bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-black via-transparent to-transparent pointer-events-none" />
+             
+             <div className="absolute top-12 left-12 w-24 h-1 bg-black/10 rounded-full" style={{ transform: 'translateZ(20px)' }} />
+             <div className="absolute bottom-12 right-12 w-16 h-1 bg-black/10 rounded-full" style={{ transform: 'translateZ(20px)' }} />
+
+             <motion.div 
+                 className="font-heading font-black text-6xl text-black/90 z-10 text-center px-8 uppercase tracking-tighter"
+                 style={{ transform: 'translateZ(40px)' }}
+             >
+               {category || (isWildcard ? "Wildcard Data" : "Research File")}
+             </motion.div>
+          </motion.div>
+        </div>
 
         {/* Transcript (Line-by-Line) */}
-        <div className="w-full max-w-2xl text-center space-y-4 mb-12 h-32 flex flex-col justify-center">
-          {TRANSCRIPT.map((line, idx) => {
+        <div className="w-full max-w-3xl text-center space-y-6 mb-16 h-40 flex flex-col justify-center relative bg-white/50 backdrop-blur-md rounded-3xl p-8 border border-white shadow-[0_10px_30px_rgba(0,0,0,0.03)]">
+          {activeTranscript.map((line, idx) => {
             const isActive = currentTime >= line.start && currentTime <= line.end;
             const isPast = currentTime > line.end;
             return (
               <motion.p
                 key={idx}
                 animate={{
-                  opacity: isActive ? 1 : isPast ? 0.3 : 0.1,
+                  opacity: isActive ? 1 : isPast ? 0.2 : 0.05,
                   scale: isActive ? 1.05 : 1,
-                  y: isActive ? 0 : isPast ? -10 : 10,
+                  y: isActive ? 0 : isPast ? -15 : 15,
+                  filter: isActive ? "blur(0px)" : "blur(2px)",
                 }}
                 className={cn(
-                  "font-body text-xl md:text-3xl font-medium transition-all duration-300 absolute w-full",
-                  isActive ? "text-white" : "text-white/50"
+                  "font-body text-2xl md:text-4xl font-semibold transition-all duration-500 absolute w-full tracking-tight",
+                  isActive ? "text-black drop-shadow-sm" : "text-black/40"
                 )}
                 style={{ visibility: (isActive || isPast || idx === 0) ? 'visible' : 'hidden' }}
               >
@@ -131,12 +177,12 @@ export function Stage({
         </div>
 
         {/* Audio Controls */}
-        <div className="flex items-center gap-6">
+        <div className="flex items-center gap-8">
           <button 
             onClick={togglePlay}
-            className="p-6 rounded-full bg-white text-black hover:scale-105 active:scale-95 transition-all shadow-[0_0_40px_rgba(255,255,255,0.3)]"
+            className="p-8 rounded-full bg-black text-white hover:scale-110 active:scale-95 transition-all duration-500 shadow-[0_10px_40px_rgba(0,0,0,0.2)]"
           >
-            {isPlaying ? <Pause size={32} fill="currentColor" /> : <Play size={32} fill="currentColor" className="ml-1" />}
+            {isPlaying ? <Pause size={36} fill="currentColor" /> : <Play size={36} fill="currentColor" className="ml-1" />}
           </button>
         </div>
 
@@ -152,48 +198,52 @@ export function Stage({
       <AnimatePresence>
         {showGame && (
           <motion.div 
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
+            initial={{ opacity: 0, backdropFilter: "blur(0px)" }}
+            animate={{ opacity: 1, backdropFilter: "blur(40px)" }}
             exit={{ opacity: 0 }}
-            className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-black/90 backdrop-blur-xl"
+            transition={{ duration: 1 }}
+            className="absolute inset-0 z-[60] flex flex-col items-center justify-center bg-white/60"
           >
-            <h2 className="text-5xl font-heading font-bold text-white mb-16 tracking-tighter">
+            <h2 className="text-[6rem] font-heading font-black text-black mb-20 tracking-tighter drop-shadow-sm">
               Sci-Fi or Fact?
             </h2>
             
             {gameResult === null ? (
-              <div className="flex gap-8">
+              <div className="flex gap-12">
                 <button 
                   onClick={() => setGameResult('lost')}
-                  className="px-12 py-6 text-2xl font-bold rounded-full border-2 border-white/20 text-white hover:bg-white hover:text-black transition-all"
+                  className="px-16 py-8 text-3xl font-bold rounded-full border border-black/10 text-black hover:bg-black hover:text-white transition-all duration-500 shadow-xl bg-white"
                 >
                   SCI-FI
                 </button>
                 <button 
                   onClick={() => setGameResult('won')}
-                  className="px-12 py-6 text-2xl font-bold rounded-full bg-cta text-white hover:brightness-125 transition-all shadow-[0_0_30px_rgba(0,102,204,0.5)]"
+                  className="px-16 py-8 text-3xl font-bold rounded-full bg-[#0066CC] text-white hover:bg-blue-700 transition-all duration-500 shadow-[0_10px_40px_rgba(0,102,204,0.4)]"
                 >
                   REAL SCIENCE
                 </button>
               </div>
             ) : (
               <motion.div 
-                initial={{ scale: 0.5, opacity: 0 }}
-                animate={{ scale: 1, opacity: 1 }}
-                className="flex flex-col items-center gap-8"
+                initial={{ scale: 0.8, opacity: 0, y: 50 }}
+                animate={{ scale: 1, opacity: 1, y: 0 }}
+                transition={{ duration: 0.8, type: "spring" }}
+                className="flex flex-col items-center gap-8 bg-white p-20 rounded-[3rem] shadow-[0_30px_100px_rgba(0,0,0,0.1)] border border-black/5"
               >
                 <div className={cn(
-                  "text-6xl font-bold font-heading",
-                  gameResult === 'won' ? "text-green-400" : "text-red-500"
+                  "text-7xl font-black font-heading tracking-tighter",
+                  gameResult === 'won' ? "text-emerald-600" : "text-rose-600"
                 )}>
-                  {gameResult === 'won' ? "CORRECT. IT'S REAL." : "WRONG. IT'S A REALITY."}
+                  {gameResult === 'won' ? "CONFIRMED." : "REJECTED."}
                 </div>
-                <p className="text-xl text-white/70 max-w-lg text-center font-body">
-                  Yes, this wild story actually happened. Science is stranger than fiction.
+                <p className="text-2xl text-black/60 max-w-2xl text-center font-body leading-relaxed">
+                  {gameResult === 'won' 
+                    ? "Yes, this wild story actually happened. Science is stranger than fiction."
+                    : "Unfortunately, that was purely theoretical. We tricked you."}
                 </p>
                 <button 
                   onClick={onClose}
-                  className="mt-8 px-8 py-4 rounded-full bg-white text-black font-bold uppercase tracking-widest hover:scale-105 transition-all"
+                  className="mt-12 px-10 py-5 rounded-full bg-black text-white font-bold uppercase tracking-widest hover:scale-105 hover:bg-neutral-800 transition-all shadow-xl"
                 >
                   Return to Lab
                 </button>
