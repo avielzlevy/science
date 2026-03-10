@@ -28,20 +28,7 @@ export default function RootLayout({
       <body
         className={`${inter.variable} ${roboto.variable} font-body bg-background text-foreground antialiased`}
       >
-        {/* Global CSS noise overlay using inline SVG filter */}
-        <div className="noise-overlay">
-          <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
-            <filter id="noiseFilter">
-              <feTurbulence
-                type="fractalNoise"
-                baseFrequency="0.65"
-                numOctaves="3"
-                stitchTiles="stitch"
-              />
-            </filter>
-            <rect width="100%" height="100%" filter="url(#noiseFilter)" />
-          </svg>
-        </div>
+        {/* Clean background established, SVG noise removed to prevent pixelation engine artifacts */}
         
         {children}
       </body>

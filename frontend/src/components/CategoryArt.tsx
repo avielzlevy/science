@@ -28,17 +28,19 @@ export function SpaceArt() {
       transformOrigin: 'top center',
     });
 
-    // Passing stars
+    // Parallax twinkling stars
     gsap.to('.star', {
-      x: -300,
-      keyframes: [{ opacity: 0 }, { opacity: 1 }, { opacity: 0 }],
-      duration: 'random(1, 3)',
+      x: "-=100%",
+      scale: "random(0.5, 1.5)",
+      opacity: "random(0.2, 1)",
+      duration: 'random(3, 8)',
       repeat: -1,
+      yoyo: true,
       stagger: {
-        each: 0.2,
-        repeat: -1,
+        each: 0.1,
+        from: 'random'
       },
-      ease: 'linear',
+      ease: 'sine.inOut',
     });
   }, { scope: container });
 
@@ -78,30 +80,30 @@ export function PhysicsArt() {
   const container = useRef<HTMLDivElement>(null);
 
   useGSAP(() => {
-    // Newton's cradle swing
+    // Newton's cradle swing - Snappy impact physics
     const tl = gsap.timeline({ repeat: -1 });
     
     tl.to('.ball-left', {
-      rotation: 40,
+      rotation: 45,
       transformOrigin: 'top center',
-      duration: 0.4,
-      ease: 'power2.out',
+      duration: 0.35,
+      ease: 'power4.out',
     })
     .to('.ball-left', {
       rotation: 0,
-      duration: 0.4,
-      ease: 'power2.in',
+      duration: 0.35,
+      ease: 'bounce.in',
     })
     .to('.ball-right', {
-      rotation: -40,
+      rotation: -45,
       transformOrigin: 'top center',
-      duration: 0.4,
-      ease: 'power2.out',
+      duration: 0.35,
+      ease: 'power4.out',
     })
     .to('.ball-right', {
       rotation: 0,
-      duration: 0.4,
-      ease: 'power2.in',
+      duration: 0.35,
+      ease: 'bounce.in',
     });
 
     // Glow pulse on impact
@@ -191,20 +193,20 @@ export function BiologyArt() {
       
       <svg className="microscope w-[60%] h-[60%] lg:w-40 lg:h-40 drop-shadow-[0_15px_30px_rgba(0,0,0,0.4)]" viewBox="0 0 100 100" fill="none">
          {/* Base */}
-         <path d="M30 85 L 70 85 C 75 85, 75 75, 70 75 L 30 75 C 25 75, 25 85, 30 85 Z" fill="#94A3B8" />
+         <path d="M30 83 L 70 83 C 75 83, 75 78, 70 78 L 30 78 C 25 78, 25 83, 30 83 Z" fill="#94A3B8" />
          {/* Arm */}
          <path d="M60 75 C 80 50, 70 20, 50 15 L 45 25 C 60 30, 65 50, 50 75 Z" fill="#E2E8F0" />
          {/* Eyepiece */}
          <path d="M45 15 L 35 5 M 50 20 L 40 10" stroke="#CBD5E1" strokeWidth="6" strokeLinecap="round" />
          <circle cx="37" cy="7" r="4" fill="#10B981" />
          {/* Tube */}
-         <rect x="35" y="25" width="16" height="25" rx="2" fill="#F1F5F9" transform="rotate(25, 43, 37)" />
+         <rect x="38" y="25" width="10" height="25" rx="2" fill="#F1F5F9" transform="rotate(25, 43, 37)" />
          {/* Stage */}
-         <rect x="25" y="60" width="30" height="4" rx="1" fill="#475569" />
+         <rect x="30" y="60" width="20" height="4" rx="1" fill="#475569" />
          {/* Petri / Sample */}
          <ellipse className="petri-dish" cx="40" cy="58" rx="8" ry="3" fill="#A7F3D0" />
          {/* Objective Lens */}
-         <path className="lens" d="M33 45 L 45 40 L 41 52 L 30 50 Z" fill="#10B981" />
+         <path className="lens" d="M33 45 L 47 40 L 41 54 L 30 50 Z" fill="#10B981" />
       </svg>
     </div>
   );
