@@ -1,22 +1,12 @@
-import {
-  Controller,
-  Get,
-  Query,
-  UseGuards,
-} from '@nestjs/common';
-import {
-  ApiOperation,
-  ApiQuery,
-  ApiResponse,
-  ApiTags,
-} from '@nestjs/swagger';
-import { Throttle } from '@nestjs/throttler';
-import { DiscoveryService } from './discovery.service';
-import { DiscoveryQueryDTO } from './dto/discovery-query.dto';
-import { DiscoveryResponseDTO } from './dto/discovery-response.dto';
+import { Controller, Get, Query, UseGuards } from "@nestjs/common";
+import { ApiOperation, ApiQuery, ApiResponse, ApiTags } from "@nestjs/swagger";
+import { Throttle } from "@nestjs/throttler";
+import { DiscoveryService } from "./discovery.service";
+import { DiscoveryQueryDTO } from "./dto/discovery-query.dto";
+import { DiscoveryResponseDTO } from "./dto/discovery-response.dto";
 
-@ApiTags('Discovery')
-@Controller('discovery')
+@ApiTags("Discovery")
+@Controller("discovery")
 export class DiscoveryController {
   constructor(private readonly discoveryService: DiscoveryService) {}
 
@@ -32,26 +22,48 @@ export class DiscoveryController {
   @Get()
   @Throttle({ default: { limit: 10, ttl: 60000 } })
   @ApiOperation({
-    summary: 'Discover a skit',
+    summary: "Discover a skit",
     description:
       'The primary discovery endpoint. Pass `isRandom=true` for "I\'m Feeling Lucky" ' +
-      'behaviour, or `categoryId` for targeted category discovery. ' +
-      'Results are Redis-cached for 7 days (category index: 1 day).',
+      "behaviour, or `categoryId` for targeted category discovery. " +
+      "Results are Redis-cached for 7 days (category index: 1 day).",
   })
-  @ApiQuery({ name: 'categoryId', required: false, type: 'string', format: 'uuid' })
-  @ApiQuery({ name: 'categorySlug', required: false, type: 'string', example: 'space' })
-  @ApiQuery({ name: 'isRandom', required: false, type: 'boolean', example: false })
-  @ApiQuery({ name: 'forceRefresh', required: false, type: 'boolean', example: false })
+  @ApiQuery({
+    name: "categoryId",
+    required: false,
+    type: "string",
+    format: "uuid",
+  })
+  @ApiQuery({
+    name: "categorySlug",
+    required: false,
+    type: "string",
+    example: "space",
+  })
+  @ApiQuery({
+    name: "isRandom",
+    required: false,
+    type: "boolean",
+    example: false,
+  })
+  @ApiQuery({
+    name: "forceRefresh",
+    required: false,
+    type: "boolean",
+    example: false,
+  })
   @ApiResponse({
     status: 200,
-    description: 'A skit ready for playback',
+    description: "A skit ready for playback",
     type: DiscoveryResponseDTO,
   })
   @ApiResponse({
     status: 503,
-    description: 'No skits available yet — pipeline is warming up',
+    description: "No skits available yet — pipeline is warming up",
   })
-  async discover(@Query() query: DiscoveryQueryDTO): Promise<DiscoveryResponseDTO> {
+  async discover(
+    @Query() query: DiscoveryQueryDTO,
+  ): Promise<DiscoveryResponseDTO> {
     return this.discoveryService.discover(query);
   }
 }

@@ -1,16 +1,16 @@
-import type { DiscoveryResponse, SkitDetail, Category } from './types';
+import type { DiscoveryResponse, SkitDetail, Category } from "./types";
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? '';
+const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? "";
 
 async function apiFetch<T>(path: string, options?: RequestInit): Promise<T> {
   const headers: Record<string, string> = {
-    'Content-Type': 'application/json',
+    "Content-Type": "application/json",
     ...(options?.headers as Record<string, string>),
   };
 
   const apiKey = process.env.NEXT_PUBLIC_API_KEY;
   if (apiKey) {
-    headers['x-api-key'] = apiKey;
+    headers["x-api-key"] = apiKey;
   }
 
   const res = await fetch(`${API_BASE}${path}`, { ...options, headers });
@@ -31,9 +31,9 @@ export async function discoverSkit(params: {
   forceRefresh?: boolean;
 }): Promise<DiscoveryResponse> {
   const sp = new URLSearchParams();
-  if (params.categorySlug) sp.set('categorySlug', params.categorySlug);
-  if (params.isRandom) sp.set('isRandom', 'true');
-  if (params.forceRefresh) sp.set('forceRefresh', 'true');
+  if (params.categorySlug) sp.set("categorySlug", params.categorySlug);
+  if (params.isRandom) sp.set("isRandom", "true");
+  if (params.forceRefresh) sp.set("forceRefresh", "true");
   return apiFetch<DiscoveryResponse>(`/api/v1/discovery?${sp}`);
 }
 
@@ -44,7 +44,7 @@ export async function getSkitById(id: string): Promise<SkitDetail> {
 
 /** Mark a skit as played (increments play count). */
 export async function markSkitPlayed(id: string): Promise<void> {
-  await apiFetch(`/api/v1/skits/${id}/played`, { method: 'PATCH' });
+  await apiFetch(`/api/v1/skits/${id}/played`, { method: "PATCH" });
 }
 
 /** List all scientific categories. */

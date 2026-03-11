@@ -1,11 +1,11 @@
-import { Module } from '@nestjs/common';
-import { ConfigModule } from '@nestjs/config';
-import { CacheModule } from '@nestjs/cache-manager';
-import { ThrottlerModule } from '@nestjs/throttler';
-import { ScheduleModule } from '@nestjs/schedule';
-import { APP_GUARD, APP_FILTER } from '@nestjs/core';
-import { createClient } from 'redis';
-import { redisStore } from 'cache-manager-redis-yet';
+import { Module } from "@nestjs/common";
+import { ConfigModule } from "@nestjs/config";
+import { CacheModule } from "@nestjs/cache-manager";
+import { ThrottlerModule } from "@nestjs/throttler";
+import { ScheduleModule } from "@nestjs/schedule";
+import { APP_GUARD, APP_FILTER } from "@nestjs/core";
+import { createClient } from "redis";
+import { redisStore } from "cache-manager-redis-yet";
 
 import {
   appConfig,
@@ -13,17 +13,17 @@ import {
   aiConfig,
   academicConfig,
   throttleConfig,
-} from './config/app.config';
+} from "./config/app.config";
 
-import { PrismaModule } from './prisma/prisma.module';
-import { CuratorModule } from './modules/curator/curator.module';
-import { SkitModule } from './modules/skit/skit.module';
-import { DiscoveryModule } from './modules/discovery/discovery.module';
-import { TrustMatrixModule } from './modules/trust-matrix/trust-matrix.module';
-import { CategoryModule } from './modules/category/category.module';
+import { PrismaModule } from "./prisma/prisma.module";
+import { CuratorModule } from "./modules/curator/curator.module";
+import { SkitModule } from "./modules/skit/skit.module";
+import { DiscoveryModule } from "./modules/discovery/discovery.module";
+import { TrustMatrixModule } from "./modules/trust-matrix/trust-matrix.module";
+import { CategoryModule } from "./modules/category/category.module";
 
-import { GlobalExceptionFilter } from './common/filters/global-exception.filter';
-import { ApiKeyGuard } from './common/guards/api-key.guard';
+import { GlobalExceptionFilter } from "./common/filters/global-exception.filter";
+import { ApiKeyGuard } from "./common/guards/api-key.guard";
 
 @Module({
   imports: [
@@ -39,12 +39,12 @@ import { ApiKeyGuard } from './common/guards/api-key.guard';
       useFactory: async () => {
         const store = await redisStore({
           socket: {
-            host: process.env.REDIS_HOST ?? 'localhost',
-            port: parseInt(process.env.REDIS_PORT ?? '6379', 10),
+            host: process.env.REDIS_HOST ?? "localhost",
+            port: parseInt(process.env.REDIS_PORT ?? "6379", 10),
           },
           password: process.env.REDIS_PASSWORD ?? undefined,
           // Default TTL: 7 days (overridden per-call in DiscoveryService)
-          ttl: parseInt(process.env.REDIS_SKIT_TTL ?? '604800', 10) * 1000,
+          ttl: parseInt(process.env.REDIS_SKIT_TTL ?? "604800", 10) * 1000,
         });
         return { store };
       },
@@ -55,8 +55,8 @@ import { ApiKeyGuard } from './common/guards/api-key.guard';
       useFactory: () => ({
         throttlers: [
           {
-            ttl: parseInt(process.env.THROTTLE_TTL ?? '60000', 10),
-            limit: parseInt(process.env.THROTTLE_LIMIT ?? '30', 10),
+            ttl: parseInt(process.env.THROTTLE_TTL ?? "60000", 10),
+            limit: parseInt(process.env.THROTTLE_LIMIT ?? "30", 10),
           },
         ],
       }),
