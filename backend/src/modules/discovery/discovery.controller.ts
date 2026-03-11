@@ -39,6 +39,7 @@ export class DiscoveryController {
       'Results are Redis-cached for 7 days (category index: 1 day).',
   })
   @ApiQuery({ name: 'categoryId', required: false, type: 'string', format: 'uuid' })
+  @ApiQuery({ name: 'categorySlug', required: false, type: 'string', example: 'space' })
   @ApiQuery({ name: 'isRandom', required: false, type: 'boolean', example: false })
   @ApiQuery({ name: 'forceRefresh', required: false, type: 'boolean', example: false })
   @ApiResponse({

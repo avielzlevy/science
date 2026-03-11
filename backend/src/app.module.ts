@@ -20,6 +20,7 @@ import { CuratorModule } from './modules/curator/curator.module';
 import { SkitModule } from './modules/skit/skit.module';
 import { DiscoveryModule } from './modules/discovery/discovery.module';
 import { TrustMatrixModule } from './modules/trust-matrix/trust-matrix.module';
+import { CategoryModule } from './modules/category/category.module';
 
 import { GlobalExceptionFilter } from './common/filters/global-exception.filter';
 import { ApiKeyGuard } from './common/guards/api-key.guard';
@@ -70,6 +71,7 @@ import { ApiKeyGuard } from './common/guards/api-key.guard';
     SkitModule,
     DiscoveryModule,
     TrustMatrixModule,
+    CategoryModule,
   ],
   providers: [
     // Global exception filter — clean AI error messages to frontend

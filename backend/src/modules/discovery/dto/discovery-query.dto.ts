@@ -2,6 +2,7 @@ import { ApiPropertyOptional } from '@nestjs/swagger';
 import {
   IsBoolean,
   IsOptional,
+  IsString,
   IsUUID,
   ValidateIf,
 } from 'class-validator';
@@ -15,6 +16,13 @@ export class DiscoveryQueryDTO {
   @IsOptional()
   @IsUUID()
   categoryId?: string;
+
+  @ApiPropertyOptional({
+    description: 'Category slug (e.g. "space", "physics") — alternative to categoryId',
+  })
+  @IsOptional()
+  @IsString()
+  categorySlug?: string;
 
   @ApiPropertyOptional({
     description: '"I\'m feeling lucky" — returns a random unplayed skit across all categories',

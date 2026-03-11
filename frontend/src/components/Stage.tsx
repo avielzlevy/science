@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Play, Pause, X, ShieldCheck, ShieldAlert } from 'lucide-react';
 import { clsx, type ClassValue } from 'clsx';
 import { twMerge } from 'tailwind-merge';
+import type { SkitDetail } from '@/lib/types';
 
 function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -59,11 +60,17 @@ const MOCK_AUDIO_SRC = "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-
 export function Stage({ 
   onClose, 
   isWildcard = false, 
-  category 
+  category,
+  skit,
+  loading = false,
+  error,
 }: { 
-  onClose: () => void, 
-  isWildcard?: boolean, 
-  category?: string 
+  onClose: () => void;
+  isWildcard?: boolean;
+  category?: string;
+  skit?: SkitDetail;
+  loading?: boolean;
+  error?: string;
 }) {
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
@@ -96,8 +103,15 @@ export function Stage({
 
   // Safe category fallback for transcripts
   const safeCategory = category && TRANSCRIPTS[category] ? category : 'wildcard';
-  const activeTranscript = TRANSCRIPTS[safeCategory];
-  const reliabilityScore = isWildcard ? 25 : 98;
+  const activeTranscript = skit
+    ? [
+        { start: 0, end: 5, text: skit.worldBefore || 'The world as we knew it…' },
+        { start: 5, end: 10, text: skit.breakthrough || 'Then everything changed…' },
+        { start: 10, end: 15, text: skit.newReality || 'A new reality emerged…' },
+      ]
+    : TRANSCRIPTS[safeCategory];
+  const reliabilityScore = skit?.reliabilityScore ?? (isWildcard ? 25 : 98);
+  const audioSrc = skit?.voiceoverUrl || MOCK_AUDIO_SRC;
 
   return (
     <motion.div
@@ -135,6 +149,29 @@ export function Stage({
         </span>
       </div>
 
+      {/* Loading state */}
+      {loading && (
+        <div className="absolute inset-0 z-[70] flex items-center justify-center bg-black/80 backdrop-blur-xl">
+          <div className="flex flex-col items-center gap-6">
+            <div className="w-12 h-12 border-4 border-white/20 border-t-white rounded-full animate-spin" />
+            <p className="text-white/70 font-body text-lg tracking-wide">Discovering research…</p>
+          </div>
+        </div>
+      )}
+
+      {/* Error state */}
+      {error && !loading && (
+        <div className="absolute inset-0 z-[70] flex items-center justify-center bg-black/80 backdrop-blur-xl">
+          <div className="flex flex-col items-center gap-6 max-w-md text-center">
+            <p className="text-white/90 font-heading font-bold text-2xl">Pipeline Warming Up</p>
+            <p className="text-white/60 font-body text-lg">{error}</p>
+            <button onClick={onClose} className="mt-4 px-8 py-3 rounded-full bg-white text-black font-bold uppercase tracking-widest hover:scale-105 transition-all">
+              Go Back
+            </button>
+          </div>
+        </div>
+      )}
+
       <div className="relative z-10 flex flex-col items-center w-full max-w-4xl px-8">
         
         <div className="perspective-1000 mb-16">
@@ -153,11 +190,14 @@ export function Stage({
              <div className="absolute top-12 left-12 w-24 h-1 bg-white/20 rounded-full" style={{ transform: 'translateZ(20px)' }} />
              <div className="absolute bottom-12 right-12 w-16 h-1 bg-white/20 rounded-full" style={{ transform: 'translateZ(20px)' }} />
 
+             {skit?.coverArtUrl && (
+               <img src={skit.coverArtUrl} alt="Cover art" className="absolute inset-0 w-full h-full object-cover z-0 rounded-[2rem]" />
+             )}
              <motion.div 
                  className="font-heading font-black text-6xl text-white/90 z-10 text-center px-8 uppercase tracking-tighter mix-blend-exclusion"
                  style={{ transform: 'translateZ(40px)' }}
              >
-               {category || (isWildcard ? "Wildcard Data" : "Research File")}
+               {skit?.research?.title || category || (isWildcard ? "Wildcard Data" : "Research File")}
              </motion.div>
           </motion.div>
         </div>
@@ -200,7 +240,7 @@ export function Stage({
 
         <audio 
           ref={audioRef} 
-          src={MOCK_AUDIO_SRC} 
+          src={audioSrc} 
           onTimeUpdate={handleTimeUpdate} 
           onEnded={() => setIsPlaying(false)}
         />
@@ -223,13 +263,13 @@ export function Stage({
             {gameResult === null ? (
               <div className="flex gap-12">
                 <button 
-                  onClick={() => setGameResult('lost')}
+                  onClick={() => setGameResult(skit ? (skit.sciFiFactRating > 0.5 ? 'won' : 'lost') : 'lost')}
                   className="px-16 py-8 text-3xl font-bold rounded-full border border-black/10 text-black hover:bg-black hover:text-white transition-all duration-500 shadow-xl bg-white"
                 >
                   SCI-FI
                 </button>
                 <button 
-                  onClick={() => setGameResult('won')}
+                  onClick={() => setGameResult(skit ? (skit.sciFiFactRating <= 0.5 ? 'won' : 'lost') : 'won')}
                   className="px-16 py-8 text-3xl font-bold rounded-full bg-[#0066CC] text-white hover:bg-blue-700 transition-all duration-500 shadow-[0_10px_40px_rgba(0,102,204,0.4)]"
                 >
                   REAL SCIENCE

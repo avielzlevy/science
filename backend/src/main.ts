@@ -37,6 +37,7 @@ async function bootstrap(): Promise<void> {
       .addApiKey({ type: 'apiKey', name: 'x-api-key', in: 'header' }, 'x-api-key')
       .addTag('Discovery', 'Input funnel — dice rolls and category selection')
       .addTag('Skits', 'Skit generation, retrieval, and playback management')
+      .addTag('Categories', 'Scientific category listing')
       .build(),
   );
 
@@ -46,7 +47,7 @@ async function bootstrap(): Promise<void> {
 
   // ── CORS — allow frontend origin ─────────────────────────────────────
   app.enableCors({
-    origin: process.env.FRONTEND_URL ?? 'http://localhost:5173',
+    origin: process.env.FRONTEND_URL ?? 'http://localhost:3001',
     methods: ['GET', 'POST', 'PATCH'],
     allowedHeaders: ['Content-Type', 'x-api-key'],
   });

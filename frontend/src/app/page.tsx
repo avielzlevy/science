@@ -4,19 +4,53 @@ import { useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { Ribbon } from '@/components/Ribbon';
 import { Stage } from '@/components/Stage';
+import { discoverSkit, getSkitById, markSkitPlayed } from '@/lib/api';
+import type { SkitDetail } from '@/lib/types';
+
+interface StageState {
+  category?: string;
+  isWildcard: boolean;
+  loading: boolean;
+  error?: string;
+  skit?: SkitDetail;
+}
 
 export default function Home() {
-  const [activeStage, setActiveStage] = useState<{ category?: string, isWildcard: boolean } | null>(null);
+  const [activeStage, setActiveStage] = useState<StageState | null>(null);
+
+  const fetchSkit = async (params: { categorySlug?: string; isRandom?: boolean }) => {
+    setActiveStage({
+      category: params.categorySlug,
+      isWildcard: params.isRandom ?? false,
+      loading: true,
+    });
+
+    try {
+      const discovery = await discoverSkit(params);
+      const skit = await getSkitById(discovery.skitId);
+      setActiveStage((prev) =>
+        prev
+          ? { ...prev, loading: false, skit, category: prev.category || skit.category?.slug }
+          : null,
+      );
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Something went wrong';
+      setActiveStage((prev) => (prev ? { ...prev, loading: false, error: message } : null));
+    }
+  };
 
   const handleSelectCategory = (category: string) => {
-    setActiveStage({ category, isWildcard: false });
+    fetchSkit({ categorySlug: category });
   };
 
   const handleDiceRoll = () => {
-    setActiveStage({ isWildcard: true });
+    fetchSkit({ isRandom: true });
   };
 
   const handleCloseStage = () => {
+    if (activeStage?.skit) {
+      markSkitPlayed(activeStage.skit.id).catch(() => {});
+    }
     setActiveStage(null);
   };
 
@@ -67,6 +101,9 @@ export default function Home() {
             onClose={handleCloseStage}
             category={activeStage.category}
             isWildcard={activeStage.isWildcard}
+            skit={activeStage.skit}
+            loading={activeStage.loading}
+            error={activeStage.error}
           />
         )}
       </AnimatePresence>

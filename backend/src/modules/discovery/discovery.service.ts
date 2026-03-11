@@ -34,11 +34,21 @@ export class DiscoveryService {
       return this.discoverRandom(query.forceRefresh ?? false);
     }
 
-    if (query.categoryId) {
-      return this.discoverByCategory(query.categoryId, query.forceRefresh ?? false);
+    // Resolve categorySlug → categoryId if needed
+    let categoryId = query.categoryId;
+    if (!categoryId && query.categorySlug) {
+      const cat = await this.prisma.category.findUnique({
+        where: { slug: query.categorySlug },
+      });
+      if (!cat) throw new NotFoundException(`Category slug "${query.categorySlug}" not found.`);
+      categoryId = cat.id;
     }
 
-    throw new NotFoundException('Provide either categoryId or isRandom=true.');
+    if (categoryId) {
+      return this.discoverByCategory(categoryId, query.forceRefresh ?? false);
+    }
+
+    throw new NotFoundException('Provide categoryId, categorySlug, or isRandom=true.');
   }
 
   // ── "I'm Feeling Lucky" — random unplayed skit ───────────────────────────
